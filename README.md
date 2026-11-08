@@ -2,7 +2,7 @@
 
 Price a commercial cleaning contract from the hours it actually takes, not square footage alone.
 
-**Try it:** https://estimator.sovrenservices.com
+**Try it:** https://cleaningbidestimator.vercel.app
 **How we built it:** https://sovrenservices.com/work/cleaning-bid-estimator
 
 ## How the math works

@@ -9,7 +9,7 @@ https://sovrenservices.com/work/cleaning-bid-estimator. This repo is public, so 
 
 ## Stack
 - Next.js (App Router) + TypeScript (strict), Tailwind CSS v4, Poppins via `next/font/google`.
-- Deployed on Vercel at estimator.sovrenservices.com. Push to `main` = production.
+- Deployed on Vercel at cleaningbidestimator.vercel.app. Push to `main` = production.
 - No backend, database or analytics today. Everything runs in the browser.
 
 ## Rules
