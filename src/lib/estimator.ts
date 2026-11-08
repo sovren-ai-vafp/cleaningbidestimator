@@ -3,6 +3,8 @@
  * Pure functions only, so the numbers can be checked without a browser.
  */
 
+import { content } from "../content";
+
 export type Area = { id: string; label: string; sqft: number; rate: number };
 
 export type CostInputs = {
@@ -32,6 +34,9 @@ export type Estimate = {
   quickPrice: number;
   quickMarginPct: number;
   gapPerMonth: number;
+  annualPrice: number;
+  profit: number;
+  pricePerVisit: number;
 };
 
 /** Average weeks in a month (52 / 12). */
@@ -39,12 +44,12 @@ export const WEEKS_PER_MONTH = 52 / 12;
 
 /** Starting production rates in sq ft cleaned per labor hour. Editable in the tool. */
 export const defaultAreas: Area[] = [
-  { id: "offices", label: "Offices (carpet)", sqft: 12000, rate: 3000 },
-  { id: "halls", label: "Hallways and lobbies", sqft: 4000, rate: 4000 },
-  { id: "restrooms", label: "Restrooms", sqft: 1200, rate: 800 },
-  { id: "breakrooms", label: "Break rooms", sqft: 800, rate: 1500 },
-  { id: "conference", label: "Conference rooms", sqft: 2000, rate: 3500 },
-  { id: "medical", label: "Exam rooms", sqft: 0, rate: 1200 },
+  { id: "offices", label: content.areaLabels[0], sqft: 12000, rate: 3000 },
+  { id: "halls", label: content.areaLabels[1], sqft: 4000, rate: 4000 },
+  { id: "restrooms", label: content.areaLabels[2], sqft: 1200, rate: 800 },
+  { id: "breakrooms", label: content.areaLabels[3], sqft: 800, rate: 1500 },
+  { id: "conference", label: content.areaLabels[4], sqft: 2000, rate: 3500 },
+  { id: "medical", label: content.areaLabels[5], sqft: 0, rate: 1200 },
 ];
 
 export const defaultCosts: CostInputs = {
@@ -60,12 +65,14 @@ export const defaultCosts: CostInputs = {
 
 const safe = (n: number) => (Number.isFinite(n) && n > 0 ? n : 0);
 
+export const areaHours = (area: Area) => safe(area.rate) ? safe(area.sqft) / area.rate : 0;
+
 export function estimate(areas: Area[], c: CostInputs): Estimate {
   const totalSqft = areas.reduce((sum, a) => sum + safe(a.sqft), 0);
-  const hoursPerVisit = areas.reduce((sum, a) => sum + (safe(a.rate) ? safe(a.sqft) / a.rate : 0), 0);
-  const visitsPerMonth = safe(c.nightsPerWeek) * WEEKS_PER_MONTH;
+  const hoursPerVisit = areas.reduce((sum, a) => sum + areaHours(a), 0);
+  const visitsPerMonth = Math.min(safe(c.nightsPerWeek), 7) * WEEKS_PER_MONTH;
   const monthlyHours = hoursPerVisit * visitsPerMonth;
-  const cleanersPerNight = safe(c.shiftHours) ? Math.ceil(hoursPerVisit / c.shiftHours) : 0;
+  const cleanersPerNight = safe(c.shiftHours) ? (visitsPerMonth > 0 ? Math.ceil(hoursPerVisit / c.shiftHours) : 0) : 0;
 
   const loadedWage = safe(c.wage) * (1 + safe(c.burdenPct) / 100);
   const laborCost = monthlyHours * loadedWage;
@@ -85,5 +92,7 @@ export function estimate(areas: Area[], c: CostInputs): Estimate {
     totalSqft, hoursPerVisit, visitsPerMonth, monthlyHours, cleanersPerNight, loadedWage,
     laborCost, suppliesCost, overheadCost, monthlyCost, monthlyPrice, pricePerSqft,
     quickPrice, quickMarginPct, gapPerMonth,
+    annualPrice: monthlyPrice * 12, profit: monthlyPrice - monthlyCost,
+    pricePerVisit: visitsPerMonth ? monthlyPrice / visitsPerMonth : 0,
   };
 }

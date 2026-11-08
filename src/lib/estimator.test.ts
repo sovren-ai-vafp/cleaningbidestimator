@@ -33,3 +33,22 @@ test("margin is capped so price stays finite", () => {
   const e = estimate(defaultAreas, { ...defaultCosts, marginPct: 100 });
   assert.ok(Number.isFinite(e.monthlyPrice));
 });
+
+test("annual, per-visit price, and profit reconcile", () => {
+  const e = estimate(defaultAreas, defaultCosts);
+  close(e.annualPrice, e.monthlyPrice * 12);
+  close(e.pricePerVisit * e.visitsPerMonth, e.monthlyPrice);
+  close(e.profit + e.monthlyCost, e.monthlyPrice);
+});
+
+test("zero service nights need no crew and more than seven nights is capped", () => {
+  const zero = estimate(defaultAreas, { ...defaultCosts, nightsPerWeek: 0 });
+  assert.equal(zero.cleanersPerNight, 0);
+  assert.equal(zero.pricePerVisit, 0);
+  close(estimate(defaultAreas, { ...defaultCosts, nightsPerWeek: 12 }).visitsPerMonth, 7 * WEEKS_PER_MONTH);
+});
+
+test("negative and non-finite inputs do not poison the estimate", () => {
+  const e = estimate([{ id: "x", label: "x", sqft: -1, rate: Infinity }], { ...defaultCosts, wage: NaN, marginPct: Infinity });
+  for (const [key, value] of Object.entries(e)) assert.ok(Number.isFinite(value), key);
+});

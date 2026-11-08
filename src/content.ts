@@ -1,6 +1,7 @@
 /** All user-facing copy for the estimator. Follow the voice rules in AGENTS.md. */
 export const content = {
   brand: "Sovren",
+  areaLabels: ["Offices (carpet)", "Hallways and lobbies", "Restrooms", "Break rooms", "Conference rooms", "Exam rooms"],
   meta: {
     title: "Commercial cleaning bid estimator | Sovren",
     description: "Price a commercial cleaning contract from the labor hours it takes, not square footage alone. A free tool from Sovren.",
@@ -53,5 +54,25 @@ export const content = {
     perMonth: "/mo",
     reset: "Reset to the example",
     footnote: "A month here is 52 weeks divided by 12. Payroll burden is what you pay on top of wages, like taxes and workers’ comp. Overhead is the cost of running the company itself.",
+  },
+} as const;
+
+export const workspace = {
+  skip: "Skip to estimator", app: "Bid workspace", project: "Project 01", navigation: "Workspace navigation",
+  overview: "Overview", building: "Building & scope", costs: "Costs & schedule", summary: "Bid summary",
+  title: "A clearer scope. A better bid.", intro: "Build a cleaning quote around the work it takes. See your costs, crew needs, and margin in one place.",
+  live: "Live estimate", example: "Example building", client: "Client / building name", notes: "Scope notes", notesPlaceholder: "Included services, exclusions, or access requirements…",
+  save: "Save draft", saved: "Draft saved on this device.", load: "Load draft", loaded: "Saved draft loaded.", noDraft: "No saved draft on this device yet.", storageError: "Your browser couldn’t access saved drafts. You can still export your estimate.", invalidDraft: "This draft could not be loaded. Your current estimate is unchanged.",
+  export: "Export CSV", print: "Print / save PDF", reset: "Reset example", resetConfirm: "Replace your current estimate with the example building? Your saved draft will stay available.",
+  confirmReset: "Replace with example", cancelReset: "Keep editing",
+  addArea: "Add area", areaName: "Area name", newArea: "Custom area", remove: "Remove area", scopeIntro: "Enter the area cleaned each visit and the pace your crew can maintain.",
+  assumptions: "Production rates are Sovren’s starting assumptions, not industry standards. Calibrate them against your own timesheets.",
+  areaCount: "Areas in scope", areaSize: "Sq ft in scope", hours: "Labor hours / visit", crew: "Cleaners / visit", shift: "Based on your shift length", monthly: "Recommended monthly bid", atMargin: "target margin", pending: "Check inputs", validation: "Complete these inputs to calculate a reliable bid:",
+  breakdown: "Where the money goes", breakdownIntro: "Monthly costs and target profit", labor: "Loaded labor", supplies: "Supplies", overhead: "Overhead", profit: "Target profit", totalCost: "Total monthly cost", annual: "Annual contract value", perVisit: "Price per visit", visits: "Visits / month", loadedWage: "Loaded hourly wage", total: "Monthly bid",
+  comparison: "Check your usual quote", comparisonIntro: "See how a square-foot quote compares with the labor-based bid.", equal: "Your usual quote matches the target bid.", under: "Below target each month", over: "Above target each month", noQuote: "Enter your usual square-foot price to compare.",
+  method: "How this is calculated", methodText: "Area ÷ production rate gives labor hours per visit. A month uses 52 weeks ÷ 12. Loaded labor includes payroll burden. Supplies are based on labor; overhead is based on labor plus supplies. Bid = total cost ÷ (1 − target margin).",
+  empty: "Add at least one area to build your estimate.", estimateOnly: "Planning estimate. Confirm the scope and production rates before sending a proposal.", private: "Your work stays in your browser.", draftNote: "Save a draft to keep it on this device.", csvName: "cleaning-bid-estimate.csv", csvMetric: "Metric", csvValue: "Value", csvScope: "Scope notes", csvClient: "Client / building", csvAssumptions: "Assumptions", csvSchedule: "Nights per week", csvMargin: "Target margin (%)", csvRate: "Sq ft per labor hour", csvSqft: "Square feet", csvHours: "Labor hours per visit",
+  errors: {
+    areas: "Add an area with positive square footage.", label: "Give every area a name.", sqft: "Square footage must be a finite number from 0 to 100,000,000.", rate: "Every included area needs a production rate greater than 0 and at most 100,000,000.", nights: "Nights per week must be a whole number from 1 to 7.", shift: "Shift length must be greater than 0 and no more than 24 hours.", wage: "Hourly wage must be greater than 0 and no more than 10,000.", percent: "Burden, supplies, and overhead must be between 0 and 100%.", margin: "Target margin must be between 0 and 90%.", quote: "Usual square-foot price must be between 0 and 10,000.",
   },
 } as const;

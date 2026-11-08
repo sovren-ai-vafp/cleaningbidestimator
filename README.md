@@ -27,3 +27,11 @@ npm run build
 ```
 
 Built by [Sovren](https://sovrenservices.com).
+
+## Bid workspace
+
+The dashboard supports editable custom areas, client/building names, scope notes, a detailed cost breakdown, annual and per-visit prices, and a comparison with your usual square-foot quote. Invalid inputs suppress pricing and disable exports instead of silently understating costs.
+
+Use **Save draft** and **Load draft** for one local estimate on the current browser/device. Drafts are explicitly saved, not synced or autosaved. **Export CSV** includes inputs, cost details, and assumptions. **Print / save PDF** uses the browser print dialog and includes internal costs and margins, so review before sharing.
+
+See [the QA review](docs/QA.md) for findings, validation evidence, and remaining verification limits.
