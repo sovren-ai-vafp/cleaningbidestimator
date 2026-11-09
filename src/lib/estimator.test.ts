@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { defaultAreas, defaultCosts, estimate, WEEKS_PER_MONTH } from "./estimator";
+import { defaultAreas, defaultCosts, estimate, WEEKS_PER_MONTH, quoteCoverage } from "./estimator";
 
 const close = (a: number, b: number, tol = 0.01) => assert.ok(Math.abs(a - b) < tol, `${a} != ${b}`);
 
@@ -51,4 +51,17 @@ test("zero service nights need no crew and more than seven nights is capped", ()
 test("negative and non-finite inputs do not poison the estimate", () => {
   const e = estimate([{ id: "x", label: "x", sqft: -1, rate: Infinity }], { ...defaultCosts, wage: NaN, marginPct: Infinity });
   for (const [key, value] of Object.entries(e)) assert.ok(Number.isFinite(value), key);
+});
+
+test("quoteCoverage names the first cost the usual quote fails to cover", () => {
+  const base = estimate(defaultAreas, defaultCosts);
+  const at = (quickRate: number) => quoteCoverage(estimate(defaultAreas, { ...defaultCosts, quickRate }));
+  const perSqft = (amount: number) => amount / base.totalSqft;
+  assert.equal(at(0), "none");
+  assert.equal(at(perSqft(base.laborCost) * 0.9), "labor");
+  assert.equal(at(perSqft(base.laborCost + base.suppliesCost / 2)), "supplies");
+  assert.equal(at(perSqft(base.monthlyCost) * 0.99), "overhead");
+  assert.equal(at(defaultCosts.quickRate), "overhead");
+  assert.equal(at(perSqft((base.monthlyCost + base.monthlyPrice) / 2)), "profit");
+  assert.equal(at(perSqft(base.monthlyPrice) * 1.01), "above");
 });

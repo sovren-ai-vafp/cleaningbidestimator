@@ -96,3 +96,19 @@ export function estimate(areas: Area[], c: CostInputs): Estimate {
     pricePerVisit: visitsPerMonth ? monthlyPrice / visitsPerMonth : 0,
   };
 }
+
+export type Coverage = "none" | "labor" | "supplies" | "overhead" | "profit" | "above";
+
+/**
+ * Which part of the bid the owner's usual quote fails to cover.
+ * "labor" means it doesn't even cover labor; "above" means it clears the full target price.
+ */
+export function quoteCoverage(e: Estimate): Coverage {
+  const q = e.quickPrice;
+  if (!(q > 0)) return "none";
+  if (q < e.laborCost) return "labor";
+  if (q < e.laborCost + e.suppliesCost) return "supplies";
+  if (q < e.monthlyCost) return "overhead";
+  if (q < e.monthlyPrice) return "profit";
+  return "above";
+}

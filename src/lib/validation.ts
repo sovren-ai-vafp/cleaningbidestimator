@@ -1,7 +1,7 @@
-import { workspace } from "../content";
+import { content } from "../content";
 import { type Area, type CostInputs } from "./estimator";
 export function validateEstimate(areas: Area[], costs: CostInputs): string[] {
-  const e = workspace.errors;
+  const e = content.errors;
   const errors: string[] = [];
   const inRange = (v: number, min: number, max: number) => Number.isFinite(v) && v >= min && v <= max;
   if (!areas.some(a => a.sqft > 0)) errors.push(e.areas);

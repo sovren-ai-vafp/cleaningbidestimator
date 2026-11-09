@@ -28,10 +28,12 @@ npm run build
 
 Built by [Sovren](https://sovrenservices.com).
 
-## Bid workspace
+## Using the tool
 
-The dashboard supports editable custom areas, client/building names, scope notes, a detailed cost breakdown, annual and per-visit prices, and a comparison with your usual square-foot quote. Invalid inputs suppress pricing and disable exports instead of silently understating costs.
+Add, rename and remove areas, enter your costs, and the bid updates as you type. The bid sheet shows how labor, supplies, overhead and profit add up to the price, and marks where your usual per-square-foot quote falls on that scale. Invalid inputs hide the price and disable exports instead of understating costs.
 
-Use **Save draft** and **Load draft** for one local estimate on the current browser/device. Drafts are explicitly saved, not synced or autosaved. **Export CSV** includes inputs, cost details, and assumptions. **Print / save PDF** uses the browser print dialog and includes internal costs and margins, so review before sharing.
+**Save draft** and **Load draft** keep one estimate in this browser. **Export CSV** includes inputs, cost details and assumptions. **Print or save as PDF** includes internal costs and margins, so review it before you send it to a client.
 
-See [the QA review](docs/QA.md) for findings, validation evidence, and remaining verification limits.
+The components follow atomic design. See `AGENTS.md` for the structure.
+
+See [the QA review](docs/QA.md) for earlier findings and validation evidence.

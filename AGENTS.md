@@ -20,6 +20,29 @@ https://sovrenservices.com/work/cleaning-bid-estimator. This repo is public, so 
 4. Default production rates are Sovren starting assumptions, not industry standards. Say so wherever they appear.
 5. Accessible by default: labeled inputs, 44px touch targets, 4.5:1 contrast, visible focus. Check 375px width.
 6. Before finishing: `npm run lint && npm test && npm run build`.
+7. Follow atomic design (https://atomicdesign.bradfrost.com/chapter-2/), the same structure as the main Sovren site.
+   Build from the smallest level up and reuse before adding. A component may only import from its own level or lower.
+
+## Structure
+```
+src/
+  app/page.tsx              # renders the page component
+  components/
+    atoms/                  # Button, Input, TextLink, Logo, Swatch
+    molecules/              # Field, NumberField, AreaRow, StatList, PriceBuild, Notice
+    organisms/              # TopBar, BuildingPanel, CostsPanel, BidSheet, MobileBidBar, PageFooter
+    templates/              # WorkspaceTemplate: layout slots only, no copy or state
+    pages/EstimatorPage.tsx # holds state and passes real content from src/content.ts
+  content.ts                # all copy
+  lib/                      # estimator math, validation, drafts, number formatting
+```
+Atoms, molecules and organisms get copy and values as props and never import `content`.
+`pages/EstimatorPage.tsx` is the only component that reads `content` and the estimator state.
+
+## Design
+- Sovren blue ramp from the design system. The navy bid sheet is the one high-emphasis surface; keep the worksheet quiet.
+- The price build bar (labor, supplies, overhead, profit, with the usual quote marked) is the tool's signature. Keep it accurate to `quoteCoverage()` in `src/lib/estimator.ts`.
+- No all-caps labels, no numbered section markers, no decorative cards. Poppins only.
 
 ## Voice (all copy)
 Write like a direct, clear-headed person. Concise, practical, unpretentious.

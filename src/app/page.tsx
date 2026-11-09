@@ -1,2 +1,3 @@
-import { Estimator } from "@/components/Estimator";
-export default function Home() { return <Estimator />; }
+import { EstimatorPage } from "@/components/pages/EstimatorPage";
+
+export default function Home() { return <EstimatorPage />; }
