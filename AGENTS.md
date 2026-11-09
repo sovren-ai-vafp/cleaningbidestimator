@@ -8,7 +8,7 @@ It's Sovren's Project 01. The story behind it lives on the main site at
 https://sovrenservices.com/work/cleaning-bid-estimator. This repo is public, so never commit secrets.
 
 ## Stack
-- Next.js (App Router) + TypeScript (strict), Tailwind CSS v4, Poppins via `next/font/google`.
+- Next.js (App Router) + TypeScript (strict), Tailwind CSS v4, Outfit (headings) and Work Sans (body) via `next/font/google`.
 - Deployed on Vercel at cleaningbidestimator.vercel.app. Push to `main` = production.
 - No backend, database or analytics today. Everything runs in the browser.
 
@@ -16,7 +16,7 @@ https://sovrenservices.com/work/cleaning-bid-estimator. This repo is public, so 
 1. All math lives in `src/lib/estimator.ts` as pure functions, covered by `src/lib/estimator.test.ts`.
    Change the math, update the tests.
 2. All user-facing copy lives in `src/content.ts`. Components don't hard-code text.
-3. Colors and type come from the Sovren Design System tokens in `src/app/globals.css`. No stray hex codes in components.
+3. Colors and type come from the estimator theme tokens in `src/app/globals.css`. No stray hex codes in components.
 4. Default production rates are Sovren starting assumptions, not industry standards. Say so wherever they appear.
 5. Accessible by default: labeled inputs, 44px touch targets, 4.5:1 contrast, visible focus. Check 375px width.
 6. Before finishing: `npm run lint && npm test && npm run build`.
@@ -40,9 +40,10 @@ Atoms, molecules and organisms get copy and values as props and never import `co
 `pages/EstimatorPage.tsx` is the only component that reads `content` and the estimator state.
 
 ## Design
-- Sovren blue ramp from the design system. The navy bid sheet is the one high-emphasis surface; keep the worksheet quiet.
+- The estimator has its own theme so it reads as a tool built for a cleaning company, not a page of the Sovren site. Swiss minimal: evergreen and fresh green on warm off-white, squared 8px controls. Don't bring the Sovren blue ramp or Poppins back here.
+- The evergreen bid sheet is the one high-emphasis surface; keep the worksheet quiet.
 - The price build bar (labor, supplies, overhead, profit, with the usual quote marked) is the tool's signature. Keep it accurate to `quoteCoverage()` in `src/lib/estimator.ts`.
-- No all-caps labels, no numbered section markers, no decorative cards. Poppins only.
+- No all-caps labels, no numbered section markers, no decorative cards. Outfit for headings and the price, Work Sans for everything else.
 
 ## Voice (all copy)
 Write like a direct, clear-headed person. Concise, practical, unpretentious.
