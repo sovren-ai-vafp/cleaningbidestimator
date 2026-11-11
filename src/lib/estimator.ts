@@ -1,11 +1,33 @@
 /**
- * Bid math for the commercial cleaning estimator on /work/cleaning-bid-estimator.
+ * Bid math for recurring cleaning contracts, one-time jobs, and projects.
  * Pure functions only, so the numbers can be checked without a browser.
  */
 
 import { content } from "../content";
 
 export type Area = { id: string; label: string; sqft: number; rate: number };
+export type BidMode = "cleaning" | "job" | "project";
+export type OneOffMode = Exclude<BidMode, "cleaning">;
+export type Stage = { id: string; label: string; hours: number; materials: number };
+
+type OneOffTerms = {
+  client: string;
+  notes: string;
+  wage: number;
+  expenses: number;
+  overheadPct: number;
+  marginPct: number;
+};
+
+export type JobBid = OneOffTerms & {
+  mode: "job";
+  workers: number;
+  onSiteHours: number;
+  travelHours: number;
+  materials: number;
+};
+export type ProjectBid = OneOffTerms & { mode: "project"; stages: Stage[] };
+export type OneOffBid = JobBid | ProjectBid;
 
 export type CostInputs = {
   nightsPerWeek: number;
@@ -63,9 +85,58 @@ export const defaultCosts: CostInputs = {
   quickRate: 0.18,
 };
 
+export const defaultJob: JobBid = {
+  mode: "job",
+  client: content.oneOff.job.example,
+  notes: "",
+  workers: 2,
+  onSiteHours: 1.5,
+  travelHours: 0.5,
+  wage: 28,
+  materials: 18,
+  expenses: 22,
+  overheadPct: 10,
+  marginPct: 20,
+};
+
+export const defaultProject: ProjectBid = {
+  mode: "project",
+  client: content.oneOff.project.example,
+  notes: "",
+  wage: 32,
+  expenses: 0,
+  overheadPct: 10,
+  marginPct: 20,
+  stages: [
+    { id: "prep", label: content.oneOff.project.stageLabels[0], hours: 6, materials: 80 },
+    { id: "paint", label: content.oneOff.project.stageLabels[1], hours: 12, materials: 260 },
+    { id: "cleanup", label: content.oneOff.project.stageLabels[2], hours: 2, materials: 20 },
+  ],
+};
+
 const safe = (n: number) => (Number.isFinite(n) && n > 0 ? n : 0);
 
 export const areaHours = (area: Area) => safe(area.rate) ? safe(area.sqft) / area.rate : 0;
+
+function priceWork(laborCost: number, directCosts: number, overheadPct: number, marginPct: number) {
+  const overheadCost = (laborCost + directCosts) * (safe(overheadPct) / 100);
+  const totalCost = laborCost + directCosts + overheadCost;
+  const margin = Math.min(safe(marginPct), 90) / 100;
+  const price = totalCost / (1 - margin);
+  return { overheadCost, totalCost, price, profit: price - totalCost };
+}
+
+export function estimateOneOff(bid: OneOffBid) {
+  const hours = bid.mode === "job"
+    ? safe(bid.workers) * (safe(bid.onSiteHours) + safe(bid.travelHours))
+    : bid.stages.reduce((total, stage) => total + safe(stage.hours), 0);
+  const materials = bid.mode === "job"
+    ? safe(bid.materials)
+    : bid.stages.reduce((total, stage) => total + safe(stage.materials), 0);
+  const laborCost = hours * safe(bid.wage);
+  const directCosts = materials + safe(bid.expenses);
+  return { hours, materials, laborCost, directCosts, ...priceWork(laborCost, directCosts, bid.overheadPct, bid.marginPct) };
+}
 
 export function estimate(areas: Area[], c: CostInputs): Estimate {
   const totalSqft = areas.reduce((sum, a) => sum + safe(a.sqft), 0);
@@ -77,11 +148,8 @@ export function estimate(areas: Area[], c: CostInputs): Estimate {
   const loadedWage = safe(c.wage) * (1 + safe(c.burdenPct) / 100);
   const laborCost = monthlyHours * loadedWage;
   const suppliesCost = laborCost * (safe(c.suppliesPct) / 100);
-  const overheadCost = (laborCost + suppliesCost) * (safe(c.overheadPct) / 100);
-  const monthlyCost = laborCost + suppliesCost + overheadCost;
-
-  const margin = Math.min(safe(c.marginPct), 90) / 100;
-  const monthlyPrice = monthlyCost / (1 - margin);
+  const { overheadCost, totalCost: monthlyCost, price: monthlyPrice, profit } =
+    priceWork(laborCost, suppliesCost, c.overheadPct, c.marginPct);
   const pricePerSqft = totalSqft ? monthlyPrice / totalSqft : 0;
 
   const quickPrice = safe(c.quickRate) * totalSqft;
@@ -92,7 +160,7 @@ export function estimate(areas: Area[], c: CostInputs): Estimate {
     totalSqft, hoursPerVisit, visitsPerMonth, monthlyHours, cleanersPerNight, loadedWage,
     laborCost, suppliesCost, overheadCost, monthlyCost, monthlyPrice, pricePerSqft,
     quickPrice, quickMarginPct, gapPerMonth,
-    annualPrice: monthlyPrice * 12, profit: monthlyPrice - monthlyCost,
+    annualPrice: monthlyPrice * 12, profit,
     pricePerVisit: visitsPerMonth ? monthlyPrice / visitsPerMonth : 0,
   };
 }

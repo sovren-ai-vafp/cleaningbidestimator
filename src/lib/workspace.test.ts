@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { defaultAreas, defaultCosts } from "./estimator";
-import { validateEstimate } from "./validation";
-import { csvCell, makeCsv, parseDraft } from "./draft";
+import { defaultAreas, defaultCosts, defaultJob, defaultProject } from "./estimator";
+import { validateEstimate, validateOneOff } from "./validation";
+import { csvCell, makeCsv, oneOffDraftKey, parseDraft, parseOneOffDraft } from "./draft";
 
 test("default estimate validates; invalid production rates, schedules and margins are blocked", () => {
   assert.deepEqual(validateEstimate(defaultAreas, defaultCosts), []);
@@ -22,4 +22,25 @@ test("CSV preserves quotes, commas, multiline scope and neutralizes formulas", (
   assert.equal(csvCell("=SUM(A1)"), '"\'=SUM(A1)"');
   assert.equal(csvCell(-20), '"-20"');
   assert.ok(makeCsv([["line\nline", 12]]).startsWith('\uFEFF"line\nline","12"'));
+});
+
+test("one-time bids reject invalid crews, empty stages, and negative costs", () => {
+  assert.deepEqual(validateOneOff(defaultJob), []);
+  assert.deepEqual(validateOneOff(defaultProject), []);
+  assert.ok(validateOneOff({ ...defaultJob, workers: 1.5 }).length);
+  assert.ok(validateOneOff({ ...defaultJob, materials: -1 }).length);
+  assert.ok(validateOneOff({ ...defaultProject, stages: [] }).length);
+});
+
+test("job and project drafts round trip independently", () => {
+  assert.notEqual(oneOffDraftKey("job"), oneOffDraftKey("project"));
+  const job = JSON.stringify({ version: 1, bid: defaultJob });
+  const project = JSON.stringify({ version: 1, bid: defaultProject });
+  assert.deepEqual(parseOneOffDraft(job, "job"), defaultJob);
+  assert.deepEqual(parseOneOffDraft(project, "project"), defaultProject);
+  assert.throws(() => parseOneOffDraft(job, "project"));
+  assert.throws(() => parseOneOffDraft(JSON.stringify({
+    version: 1,
+    bid: { ...defaultProject, stages: [defaultProject.stages[0], defaultProject.stages[0]] },
+  }), "project"));
 });

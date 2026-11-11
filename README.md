@@ -1,11 +1,19 @@
-# Commercial cleaning bid estimator
+# Bid estimator for field services
 
-Price a commercial cleaning contract from the hours it actually takes, not square footage alone.
+Price a recurring contract, one-time service job, or multi-stage project from labor, expenses, and target margin.
 
 **Try it:** https://cleaningbidestimator.vercel.app
 **How we built it:** https://sovrenservices.com/work/cleaning-bid-estimator
 
-## How the math works
+## Bid types
+
+- **Cleaning contract** uses area sizes, cleaning rates, and visits per week to calculate a monthly bid.
+- **Job bid** uses crew size, on-site and travel hours, materials, and equipment to price one service visit. [Try the lawn care example](https://cleaningbidestimator.vercel.app/?mode=job).
+- **Project bid** adds labor hours and materials across stages to price the full scope. [Try the painting example](https://cleaningbidestimator.vercel.app/?mode=project).
+
+For job and project bids, labor uses the loaded hourly rate. Overhead applies to labor and other direct costs. Price is total cost divided by one minus the target margin.
+
+## How the cleaning math works
 1. Each area's square footage divided by its production rate (sq ft cleaned per labor hour) gives labor hours per night.
 2. Hours per night times nights per month (52 weeks / 12) gives monthly labor hours.
 3. Labor cost uses the loaded wage: wage plus payroll burden.
@@ -32,7 +40,7 @@ Built by [Sovren](https://sovrenservices.com).
 
 Add, rename and remove areas, enter your costs, and the bid updates as you type. The bid sheet shows how labor, supplies, overhead and profit add up to the price, and marks where your usual per-square-foot quote falls on that scale. Invalid inputs hide the price and disable exports instead of understating costs.
 
-**Save draft** and **Load draft** keep one estimate in this browser. **Export CSV** includes inputs, cost details and assumptions. **Print or save as PDF** includes internal costs and margins, so review it before you send it to a client.
+**Save draft** and **Load draft** keep one estimate per bid type in this browser. **Export CSV** includes inputs, cost details and assumptions. **Print or save as PDF** includes internal costs and margins, so review it before you send it to a client.
 
 The components follow atomic design. See `AGENTS.md` for the structure.
 

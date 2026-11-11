@@ -1,8 +1,28 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { defaultAreas, defaultCosts, estimate, WEEKS_PER_MONTH, quoteCoverage } from "./estimator";
+import { defaultAreas, defaultCosts, defaultJob, defaultProject, estimate, estimateOneOff, WEEKS_PER_MONTH, quoteCoverage } from "./estimator";
 
 const close = (a: number, b: number, tol = 0.01) => assert.ok(Math.abs(a - b) < tol, `${a} != ${b}`);
+
+test("job bid charges for on-site and travel hours for the whole crew", () => {
+  const bid = estimateOneOff(defaultJob);
+  assert.equal(bid.hours, 4);
+  assert.equal(bid.laborCost, 112);
+  assert.equal(bid.directCosts, 40);
+  close(bid.overheadCost, 15.2);
+  close(bid.totalCost, 167.2);
+  close(bid.price, 209);
+  close(bid.profit / bid.price, 0.2, 1e-9);
+});
+
+test("project bid prices each stage once and adds other direct costs", () => {
+  const bid = estimateOneOff(defaultProject);
+  assert.equal(bid.hours, 20);
+  assert.equal(bid.materials, 360);
+  assert.equal(bid.totalCost, 1100);
+  close(bid.price, 1375);
+  close(estimateOneOff({ ...defaultProject, expenses: 80 }).price, 1485);
+});
 
 test("example building matches a hand calculation", () => {
   const e = estimate(defaultAreas, defaultCosts);

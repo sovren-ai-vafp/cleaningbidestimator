@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 type WorkspaceTemplateProps = {
   topBar: ReactNode;
+  modePicker: ReactNode;
   intro: ReactNode;
   worksheet: ReactNode;
   sheet: ReactNode;
@@ -10,10 +11,11 @@ type WorkspaceTemplateProps = {
 };
 
 /** Template: inputs on the left, the bid pinned on the right. On phones the bid follows the inputs. */
-export function WorkspaceTemplate({ topBar, intro, worksheet, sheet, footer, mobileBar }: WorkspaceTemplateProps) {
+export function WorkspaceTemplate({ topBar, modePicker, intro, worksheet, sheet, footer, mobileBar }: WorkspaceTemplateProps) {
   return <div className="app">
     {topBar}
     <main id="estimator" tabIndex={-1}>
+      {modePicker}
       {intro}
       <div className="workspace">
         <div className="worksheet">{worksheet}</div>

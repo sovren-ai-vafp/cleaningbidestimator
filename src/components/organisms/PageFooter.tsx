@@ -3,7 +3,7 @@ import type { Content } from "@/content";
 
 /** Organism: method note and the link back to Sovren. */
 export function PageFooter({ method, footer, links, project }: {
-  method: Content["method"]; footer: Content["footer"]; links: Content["links"]; project: Content["topBar"];
+  method: { heading: string; body: string }; footer: Content["footer"]; links: Content["links"]; project: Content["topBar"];
 }) {
   return <footer className="page-footer">
     <section id="adapt" className="adapt" aria-labelledby="adapt-heading" tabIndex={-1}>
