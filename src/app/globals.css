@@ -98,6 +98,7 @@ a { color: inherit; }
 .price-build { margin-top: 28px; }
 .price-build-label { font-size: 13px; color: var(--on-dark); }
 .price-build-track { position: relative; display: flex; gap: 3px; height: 14px; margin-top: 44px; }
+.price-build-track:not(:has(.price-build-marker)) { margin-top: 12px; }
 .price-build-part { height: 100%; border-radius: 2px; transition: width .35s ease; }
 .price-build-marker { position: absolute; top: -30px; bottom: -6px; width: 2px; margin-left: -1px; background: var(--white); transition: left .35s ease; }
 .price-build-marker-label { position: absolute; top: 0; left: 8px; font-size: 12px; line-height: 1; white-space: nowrap; }
@@ -113,6 +114,9 @@ a { color: inherit; }
 .top-bar .logo { justify-self: start; }
 .draft-actions { display: flex; gap: 8px; }
 .status { grid-column: 1 / -1; text-align: right; font-size: 13px; color: var(--ink-muted); min-height: 20px; }
+.mode-picker { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 16px; }
+.mode-picker a { display: inline-flex; align-items: center; text-decoration: none; }
+.mode-picker a[aria-current] { background: var(--brand); border-color: var(--brand); color: var(--white); }
 
 .intro { padding: 32px 0 24px; }
 .intro h1 { font-size: clamp(32px, 4.2vw, 54px); line-height: 1.08; font-weight: 500; letter-spacing: -.035em; }
@@ -137,6 +141,8 @@ a { color: inherit; }
 .schedule-fields { margin-top: 16px; }
 .pricing-toggle { margin-top: 16px; }
 .pricing-settings { margin-top: 16px; }
+.project-stages { display: grid; gap: 12px; margin-top: 20px; }
+.project-stage { display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr)) 44px; gap: 10px; align-items: end; }
 .reset-actions .notice { margin-top: 0; }
 @media screen {
   .pricing-settings[data-collapsed="true"] { display: none; }
@@ -147,8 +153,8 @@ a { color: inherit; }
 .bid-sheet :focus-visible { outline-color: var(--part-3); }
 .bid-client { font-size: 13px; color: var(--on-dark-muted); overflow-wrap: anywhere; }
 .bid-label { margin-top: 2px; font-size: 15px; font-weight: 500; color: var(--on-dark); }
-.bid-price { margin: 6px 0 16px; font-size: clamp(52px, 5.4vw, 76px); line-height: 1.02; font-weight: 500; letter-spacing: -.045em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.bid-price span { margin-left: 10px; font-size: 15px; font-weight: 400; letter-spacing: 0; color: var(--on-dark); }
+.bid-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 6px 0 16px; font-size: clamp(52px, 5.4vw, 76px); line-height: 1.02; font-weight: 500; letter-spacing: -.045em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.bid-price span { font-size: 15px; line-height: 1.3; font-weight: 400; letter-spacing: 0; color: var(--on-dark); }
 .bid-sheet .stat-list > div { border-color: var(--brand-line); }
 .bid-sheet .stat-list dt { color: var(--on-dark); }
 .bid-rates { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 24px; }
@@ -190,6 +196,7 @@ a { color: inherit; }
 @media (max-width: 640px) {
   .app { padding: 0 14px; }
   .draft-actions .btn { padding: 0 14px; }
+  .mode-picker a { padding-inline: 10px; }
   .intro { padding: 28px 0 20px; }
   .intro > p { font-size: 15px; }
   .panel { padding: 20px 16px; }
@@ -205,6 +212,9 @@ a { color: inherit; }
   .area-total span:nth-child(2) { padding-left: 0; }
   .area-total span:nth-child(2)::after { content: " sq ft"; font-weight: 400; color: var(--ink-muted); }
   .area-total span:nth-child(4)::after { content: " h"; font-weight: 400; color: var(--ink-muted); }
+  .project-stage { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .stage-name { grid-column: 1 / -1; grid-row: 1; padding-right: 54px; }
+  .stage-remove { grid-column: 2; grid-row: 1; justify-self: end; }
   .bid-sheet { padding: 24px 20px; border-radius: 14px; }
   .bid-rates, .bid-stats, .price-build-legend { grid-template-columns: minmax(0,1fr); }
 }
@@ -216,7 +226,7 @@ a { color: inherit; }
   @page { margin: 14mm; }
   body { background: var(--white); font-size: 11px; padding: 0; }
   .app { padding: 0; }
-  .draft-actions, .status, .mobile-bid-bar, .page-footer, .demo-guide, .reset-actions, .btn, .remove-button, .skip-link { display: none !important; }
+  .draft-actions, .status, .mode-picker, .mobile-bid-bar, .page-footer, .demo-guide, .reset-actions, .btn, .remove-button, .skip-link { display: none !important; }
   .top-bar { border: 0; padding: 0; }
   .intro { padding: 12px 0; }
   .intro h1 { font-size: 26px; }

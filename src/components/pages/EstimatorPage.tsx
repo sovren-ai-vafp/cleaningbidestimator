@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { content } from "@/content";
-import { areaHours, defaultAreas, defaultCosts, estimate, quoteCoverage, type Area, type CostInputs } from "@/lib/estimator";
+import { areaHours, defaultAreas, defaultCosts, estimate, quoteCoverage, type Area, type BidMode, type CostInputs } from "@/lib/estimator";
 import { validateEstimate } from "@/lib/validation";
-import { DRAFT_KEY, makeCsv, parseDraft, type Draft } from "@/lib/draft";
+import { DRAFT_KEY, downloadCsv, parseDraft, type Draft } from "@/lib/draft";
 import { cents, money, number } from "@/lib/format";
 import { WorkspaceTemplate } from "../templates/WorkspaceTemplate";
 import { TopBar } from "../organisms/TopBar";
@@ -15,11 +15,49 @@ import { BidSheet } from "../organisms/BidSheet";
 import { MobileBidBar } from "../organisms/MobileBidBar";
 import { PageFooter } from "../organisms/PageFooter";
 import type { Part } from "../atoms/Swatch";
-import { Button } from "../atoms/Button";
-import { Notice } from "../molecules/Notice";
+import { ExampleReset } from "../molecules/ExampleReset";
+import { ModePicker } from "../organisms/ModePicker";
+import { useOneOffWorkspace } from "./useOneOffWorkspace";
 
-/** Page: holds the estimate state and fills the workspace template with real content. */
+const modeEvent = "bid-mode-change";
+const defaultMode = (): BidMode => "cleaning";
+
+function readMode(): BidMode {
+  const mode = new URLSearchParams(window.location.search).get("mode");
+  return mode === "job" || mode === "project" ? mode : defaultMode();
+}
+
+function subscribeToMode(update: () => void) {
+  window.addEventListener("popstate", update);
+  window.addEventListener(modeEvent, update);
+  return () => {
+    window.removeEventListener("popstate", update);
+    window.removeEventListener(modeEvent, update);
+  };
+}
+
+function selectMode(mode: BidMode) {
+  if (mode === readMode()) return;
+  const url = new URL(window.location.href);
+  url.hash = "";
+  if (mode === "cleaning") url.searchParams.delete("mode");
+  else url.searchParams.set("mode", mode);
+  window.history.pushState(null, "", url);
+  window.dispatchEvent(new Event(modeEvent));
+}
+
 export function EstimatorPage() {
+  const mode = useSyncExternalStore(subscribeToMode, readMode, defaultMode);
+  const cleaning = useCleaningWorkspace();
+  const oneOff = useOneOffWorkspace(mode === "project" ? "project" : "job");
+
+  return <WorkspaceTemplate
+    {...(mode === "cleaning" ? cleaning : oneOff)}
+    modePicker={<ModePicker mode={mode} copy={content.modes} onSelect={selectMode} />}
+  />;
+}
+
+function useCleaningWorkspace() {
   const { building: b, bid, status: s, costs: costCopy, csv } = content;
   const [areas, setAreas] = useState<Area[]>(defaultAreas);
   const [costs, setCosts] = useState<CostInputs>(defaultCosts);
@@ -88,16 +126,14 @@ export function EstimatorPage() {
       [bid.crew, result.cleanersPerNight], [csv.quickPrice, result.quickPrice], [bid.marginAtQuote, result.quickMarginPct],
       [csv.assumptions, b.assumption], [content.method.heading, content.method.body], [bid.fine],
     ];
-    const url = URL.createObjectURL(new Blob([makeCsv(rows)], { type: "text/csv;charset=utf-8;" }));
-    const link = document.createElement("a"); link.href = url; link.download = csv.name; link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    downloadCsv(csv.name, rows);
   };
 
-  return <WorkspaceTemplate
-    topBar={<TopBar brand={content.brand} links={content.links} copy={content.topBar} status={status} onSave={save} onLoad={load} />}
-    intro={<EstimatorIntro copy={content.intro} sampleVisits={sampleVisits}
-      onTrySchedule={() => updateCost("nightsPerWeek", sampleVisits)} />}
-    worksheet={<>
+  return {
+    topBar: <TopBar brand={content.brand} links={content.links} copy={content.topBar} status={status} onSave={save} onLoad={load} />,
+    intro: <EstimatorIntro copy={content.intro} sampleVisits={sampleVisits}
+      onTrySchedule={() => updateCost("nightsPerWeek", sampleVisits)} />,
+    worksheet: <>
       <CostsPanel copy={costCopy} costs={costs} onChange={updateCost}
         pricingOpen={pricingOpen} onTogglePricing={() => setPricingOpen(open => !open)} />
       <BuildingPanel copy={b} client={client} notes={notes} areas={areas}
@@ -106,16 +142,11 @@ export function EstimatorPage() {
         onClient={setClient} onNotes={setNotes} onArea={updateArea}
         onAdd={() => setAreas(current => [...current, { id: crypto.randomUUID(), label: b.newArea, sqft: 0, rate: 2000 }])}
         onRemove={id => setAreas(current => current.filter(a => a.id !== id))} />
-      <div className="reset-actions">
-        {confirmReset
-          ? <Notice><p>{costCopy.resetConfirm}</p><div className="notice-actions">
-            <Button onClick={() => setConfirmReset(false)}>{costCopy.cancelReset}</Button>
-            <Button variant="solid" onClick={reset}>{costCopy.confirmReset}</Button>
-          </div></Notice>
-          : <Button variant="link" onClick={() => setConfirmReset(true)}>{costCopy.reset}</Button>}
-      </div>
-    </>}
-    sheet={<BidSheet copy={bid} client={client} valid={valid} errors={errors} price={price}
+      <ExampleReset label={costCopy.reset} confirm={costCopy.resetConfirm} cancel={costCopy.cancelReset}
+        replace={costCopy.confirmReset} open={confirmReset} onOpen={() => setConfirmReset(true)}
+        onCancel={() => setConfirmReset(false)} onReplace={reset} />
+    </>,
+    sheet: <BidSheet copy={bid} client={client} valid={valid} errors={errors} price={price}
       rates={[{ label: bid.hours, value: show(number.format(result.hoursPerVisit)) }, { label: bid.perVisit, value: show(money.format(result.pricePerVisit)) }]}
       parts={parts} quote={hasQuote ? { amount: result.quickPrice, display: money.format(result.quickPrice) } : undefined}
       verdict={verdict} coverage={coverage}
@@ -125,8 +156,8 @@ export function EstimatorPage() {
         { label: bid.visits, value: show(number.format(result.visitsPerMonth)) },
         { label: bid.annual, value: show(money.format(result.annualPrice)) },
       ]}
-      onPrint={() => window.print()} onExport={exportCsv} />}
-    footer={<PageFooter method={content.method} footer={content.footer} links={content.links} project={content.topBar} />}
-    mobileBar={<MobileBidBar label={bid.mobileHeading} price={price} jump={bid.jump} />}
-  />;
+      onPrint={() => window.print()} onExport={exportCsv} />,
+    footer: <PageFooter method={content.method} footer={content.footer} links={content.links} project={content.topBar} />,
+    mobileBar: <MobileBidBar label={bid.mobileHeading} price={price} jump={bid.jump} />,
+  };
 }
