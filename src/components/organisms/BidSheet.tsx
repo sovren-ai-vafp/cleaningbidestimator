@@ -20,10 +20,10 @@ type BidSheetProps = {
 
 /** Organism: the live bid. The one dark, high-emphasis surface on the page. */
 export function BidSheet({ copy, client, valid, errors, price, rates, parts, quote, verdict, coverage, stats, onPrint, onExport }: BidSheetProps) {
-  return <section id="bid" className="bid-sheet" aria-labelledby="bid-heading">
+  return <section id="bid" className="bid-sheet" aria-labelledby="bid-heading" tabIndex={-1}>
     <p className="bid-client">{client}</p>
     <h2 id="bid-heading" className="bid-label">{copy.heading}</h2>
-    <p className="bid-price" aria-live="polite" aria-atomic="true">{price}<span>{copy.perMonth}</span></p>
+    <p className="bid-price" aria-live="polite" aria-atomic="true">{price}{valid ? <span>{copy.perMonth}</span> : null}</p>
     {valid ? <StatList className="bid-rates" items={rates} /> : <Notice tone="alert"><p>{copy.validation}</p><ul>{errors.map(e => <li key={e}>{e}</li>)}</ul></Notice>}
     {valid ? <PriceBuild label={copy.buildLabel} parts={parts} quote={quote ? { ...quote, label: copy.quoteMarker } : undefined} /> : null}
     {valid ? <div className="bid-verdict">{verdict ? <p className="bid-verdict-gap">{verdict}</p> : null}<p>{coverage}</p></div> : null}
