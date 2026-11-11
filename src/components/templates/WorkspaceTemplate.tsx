@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 type WorkspaceTemplateProps = {
   topBar: ReactNode;
-  intro: { heading: string; body: string; privacy: string };
+  intro: ReactNode;
   worksheet: ReactNode;
   sheet: ReactNode;
   footer: ReactNode;
@@ -14,10 +14,7 @@ export function WorkspaceTemplate({ topBar, intro, worksheet, sheet, footer, mob
   return <div className="app">
     {topBar}
     <main id="estimator" tabIndex={-1}>
-      <div className="intro">
-        <h1>{intro.heading}</h1>
-        <p>{intro.body} {intro.privacy}</p>
-      </div>
+      {intro}
       <div className="workspace">
         <div className="worksheet">{worksheet}</div>
         <div className="sheet-column">{sheet}</div>
